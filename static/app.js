@@ -412,58 +412,41 @@ var minutes = document.getElementById('minutes');
 var next = document.getElementById('next');
 var inSchool = document.getElementById('in-school');
 var outSchool = document.getElementById('out-school');
-var $redwood = document.getElementById('redwood');
-var $drake = document.getElementById('drake');
-var home = document.getElementById('home');
-var switchSchools = document.getElementById('switch');
 var h1 = document.querySelectorAll('h1');
 var h2 = document.querySelectorAll('h2');
 var currentSchedule;
 
 //Register Service Worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js', { scope: '/' })
-  .then(function () {
-    console.log('[SW] Registered');
-  })
-  .catch(err => {
-    console.warn('Error', err);
-  });
-}
+// if ('serviceWorker' in navigator) {
+//   navigator.serviceWorker.register('./sw.js', { scope: '/' })
+//   .then(function () {
+//     console.log('[SW] Registered');
+//   })
+//   .catch(err => {
+//     console.warn('Error', err);
+//   });
+// }
 
-if(window.localStorage) {
-  init();
-} else {
-  console.warn('Your broswer does not support local storage :(');
-}
 
-switchSchools.addEventListener('click', function() {
-  localStorage.removeItem('school');
-  reset();
-});
-
-function reset() {
-  inSchool.style.display = 'none';
-  outSchool.style.display = 'none';
-  home.style.display = 'flex';
-  init();
-}
+inSchool.style.display = 'none';
+outSchool.style.display = 'none';
+console.log('init');
+init();
 
 function init() {
-  if(localStorage.getItem('school')) {
-    initSchool(schools[localStorage.getItem('school')]);
-  }else {
-    home.style.display = 'flex';
-    $redwood.addEventListener('click', function() {
-      localStorage.setItem('school', 1);
-      initSchool(schools[1]);
-    });
-
-    $drake.addEventListener('click', function() {
-      localStorage.setItem('school', 0);
-      initSchool(schools[0]);
-    });
+  if (window.location.hostname == 'drakeschedule.tk') {
+    console.log('drake');
+    initSchool(0);
   }
+  else if (window.location.hostname == 'redwoodschedule.tk') {
+    console.log('redwood');
+    initSchool(1);
+  }
+  else {
+    console.log('other');
+    initSchool(0);
+  }
+
 }
 
 function styleColors(one, two) {
@@ -476,13 +459,13 @@ function styleColors(one, two) {
 }
 
 function initSchool(school) {
-  if(localStorage.getItem('school') == 1){
+  schoolSchedule = schools[school];
+  if(school == 1){
     console.log('yep');
     styleColors('#F44336', '#000');
-  }else if(localStorage.getItem('school') == 0){
+  }else if(school == 0){
     styleColors('#4CAF50', '#000');
   }
-  home.style.display = 'none';
   inSchool.style.display = 'block';
 
   var now = new Date();
@@ -491,7 +474,7 @@ function initSchool(school) {
   var min = now.getMinutes();
   var hour = now.getHours();
   min = (hour * 60) + min;
-  currentSchedule = school[day].periods;
+  currentSchedule = schoolSchedule[day].periods;
 
   if (day == 6 || day == 0 || min > currentSchedule[currentSchedule.length - 2].end) {
     inSchool.style.display = 'none';
