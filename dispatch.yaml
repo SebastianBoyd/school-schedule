@@ -1,0 +1,6 @@
+application: tam-school-schedule    # overridden by -A
+
+dispatch:
+# Let's Encrypt ACME challenge service
+- url: "*/.well-known/acme-challenge/*"
+  module: acme
