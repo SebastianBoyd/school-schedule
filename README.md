@@ -1,4 +1,3 @@
-# duncangrubbs.github.io
-Duncan Grubbs' Website
+# Tam Schedules
 
-- A remake of maxstarr.xyz that works offline!
+- A remake of maxstarr.xyz that works offline and has a new UI!
