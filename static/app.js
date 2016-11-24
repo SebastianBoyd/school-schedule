@@ -407,46 +407,44 @@ var drake = [
 var schools = [drake, redwood];
 
 //Create Variables
-var period = document.getElementById('period');
-var minutes = document.getElementById('minutes');
-var next = document.getElementById('next');
-var inSchool = document.getElementById('in-school');
-var outSchool = document.getElementById('out-school');
+var currentPeriod = document.getElementById('period');
+var timeLeft = document.getElementById('minutes');
+var nextPeriod = document.getElementById('next');
+var inSchoolPage = document.getElementById('in-school');
+var outOfSchoolPage = document.getElementById('out-school');
 var h1 = document.querySelectorAll('h1');
 var h2 = document.querySelectorAll('h2');
+
+var minutesLeft;
 var currentSchedule;
+var schoolSchedule;
+var now;
+var day;
+var date;
+var currentHour;
+var currentMinute;
 
-//Register Service Worker
-// if ('serviceWorker' in navigator) {
-//   navigator.serviceWorker.register('./sw.js', { scope: '/' })
-//   .then(function () {
-//     console.log('[SW] Registered');
-//   })
-//   .catch(err => {
-//     console.warn('Error', err);
-//   });
-// }
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js', { scope: '/' })
+  .then(function () {
+    console.log('[SW] Registered');
+  })
+  .catch(err => {
+    console.warn('Error', err);
+  });
+}
 
-
-inSchool.style.display = 'none';
-outSchool.style.display = 'none';
-console.log('init');
 init();
 
 function init() {
   if (window.location.hostname == 'drakeschedule.tk') {
-    console.log('drake');
     initSchool(0);
-  }
-  else if (window.location.hostname == 'redwoodschedule.tk') {
-    console.log('redwood');
+  } else if (window.location.hostname == 'redwoodschedule.tk') {
     initSchool(1);
-  }
-  else {
-    console.log('other');
+  } else {
     initSchool(0);
   }
-
 }
 
 function styleColors(one, two) {
@@ -461,60 +459,72 @@ function styleColors(one, two) {
 function initSchool(school) {
   schoolSchedule = schools[school];
   if(school == 1){
-    console.log('yep');
     styleColors('#F44336', '#000');
   }else if(school == 0){
     styleColors('#4CAF50', '#000');
   }
-  inSchool.style.display = 'block';
+  inSchoolPage.style.display = 'block';
 
-  var now = new Date();
-  var day = now.getDay();
-  var date = now.getDate();
-  var min = now.getMinutes();
-  var hour = now.getHours();
-  min = (hour * 60) + min;
+  now = new Date();
+  day = now.getDay();
+  currentMinute = now.getMinutes();
   currentSchedule = schoolSchedule[day].periods;
 
-  if (day == 6 || day == 0 || min > currentSchedule[currentSchedule.length - 2].end) {
-    inSchool.style.display = 'none';
-    outSchool.style.display = 'block';
+  if (day == 6 || day == 0 || currentMinute > currentSchedule[currentSchedule.length - 2].end) {
+    inSchoolPage.style.display = 'none';
+    outOfSchoolPage.style.display = 'block';
   } else {
     updateInfo();
     window.setInterval(updateInfo, 500);
   }
 }
 
-
+//Define function that will update the info on screen based on the current schedule
 function updateInfo() {
   now = new Date();
-  hour = now.getHours();
-  min = now.getMinutes();
-  min = (hour * 60) + min;
+  currentHour = now.getHours();
+  currentMinute = now.getMinutes();
+  currentMinute = (currentHour * 60) + currentMinute;
+  currentMinute = 678;
   for (var i = 0; i < currentSchedule.length; i++) {
-    if(min > currentSchedule[i].end && min < currentSchedule[i + 1].end) {
-      period.textContent = currentSchedule[i + 1].name;
-      var left = currentSchedule[i + 1].end - min;
-      if(left > 60) {
-        var hours = Math.round(left / 60);
-        left = left % 60;
-        minutes.textContent = hours + 'hour and ' + left + ' minutes';
-      }else {
-        minutes.textContent = left + ' minutes';
+    //If the current time is beyond the end of the current schedule, and less then the end of the next class
+    if (currentMinute > currentSchedule[i].end && currentMinute < currentSchedule[i + 1].end) {
+      //Then the current period is the index, i + 1
+      currentPeriod.textContent = currentSchedule[i + 1].name;
+      //We define left as time left in period by subtracting the current time from the end time
+      minutesLeft = currentSchedule[i + 1].end - currentMinute;
+      //If the amount of time (in minutes) is greater than 60, display time in hours and mintutes
+      if (minutesLeft > 60) {
+        //Call function to calculate time left
+        timeLeft.textContent = minutesToHours(minutesLeft).hours + ' hour and ' + minutesToHours(minutesLeft).minutes + ' minutes';
+        //OTHERWISE, just display minutes left
+      } else {
+        timeLeft.textContent = minutesLeft + ' minutes';
       }
-      next.textContent = currentSchedule[i + 2].name;
-    }else if(min >= 480 && min < currentSchedule[0].end){
-      period.textContent = currentSchedule[i].name;
-      var left = currentSchedule[i].end - min;
-      if(left > 60) {
-        var hours = Math.round(left / 60);
-        left = left % 60;
-        minutes.textContent = hours + 'hour and' + left + ' minutes';
-      }else {
-        minutes.textContent = left + ' minutes';
+      //Define next period and i + 2, because the current one is i + 1
+      nextPeriod.textContent = currentSchedule[i + 2].name;
+      //OTHERWISE, if it is first period
+    } else if (currentMinute >= 480 && currentMinute < currentSchedule[0].end) {
+      //Define next period
+      nextPeriod.textContent = currentSchedule[i].name;
+      minutesLeft = currentSchedule[i].end - currentMinute;
+      if (minutesLeft > 60) {
+        //Call function to calculate time left
+        timeLeft.textContent = minutesToHours(minutesLeft).hours + ' hour and ' + minutesToHours(minutesLeft).minutes + ' minutes';
+        //OTHERWISE, just display minutes left
+      } else {
+        timeLeft.textContent = minutesLeft + ' minutes';
       }
-      next.textContent = currentSchedule[i + 1].name;
+      currentPeriod.textContent = currentSchedule[i + 1].name;
       return;
     }
   }
+}
+
+///Define function that returns hours and minutes from minutes
+function minutesToHours(timeLeft) {
+  return {
+        hours: Math.round(timeLeft / 60),
+        minutes: timeLeft % 60
+    };
 }
