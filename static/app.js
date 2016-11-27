@@ -467,15 +467,21 @@ function initSchool(school) {
 
   now = new Date();
   day = now.getDay();
+  currentHour = now.getHours();
   currentMinute = now.getMinutes();
-  currentSchedule = schoolSchedule[day].periods;
-
-  if (day == 6 || day == 0 || currentMinute > currentSchedule[currentSchedule.length - 2].end) {
+  currentMinute = (currentHour * 60) + currentMinute;
+  if(day <= 4) {
+    currentSchedule = schoolSchedule[day].periods;
+    if (currentMinute > currentSchedule[currentSchedule.length - 2].end) {
+      inSchoolPage.style.display = 'none';
+      outOfSchoolPage.style.display = 'block';
+    } else {
+      updateInfo();
+      window.setInterval(updateInfo, 500);
+    }
+  } else {
     inSchoolPage.style.display = 'none';
     outOfSchoolPage.style.display = 'block';
-  } else {
-    updateInfo();
-    window.setInterval(updateInfo, 500);
   }
 }
 
@@ -485,10 +491,9 @@ function updateInfo() {
   currentHour = now.getHours();
   currentMinute = now.getMinutes();
   currentMinute = (currentHour * 60) + currentMinute;
-  currentMinute = 678;
   for (var i = 0; i < currentSchedule.length; i++) {
     //If the current time is beyond the end of the current schedule, and less then the end of the next class
-    if (currentMinute > currentSchedule[i].end && currentMinute < currentSchedule[i + 1].end) {
+    if (currentMinute >= currentSchedule[i].end && currentMinute <= currentSchedule[i + 1].end) {
       //Then the current period is the index, i + 1
       currentPeriod.textContent = currentSchedule[i + 1].name;
       //We define left as time left in period by subtracting the current time from the end time
