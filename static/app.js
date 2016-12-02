@@ -470,7 +470,7 @@ function initSchool(school) {
   currentHour = now.getHours();
   currentMinute = now.getMinutes();
   currentMinute = (currentHour * 60) + currentMinute;
-  if(day <= 4) {
+  if(day <= 5) {
     currentSchedule = schoolSchedule[day].periods;
     if (currentMinute > currentSchedule[currentSchedule.length - 2].end) {
       inSchoolPage.style.display = 'none';
